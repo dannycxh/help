@@ -1,0 +1,34 @@
+nginx 修改
+
+
+nginx [alert] 12339#0: 1024 worker_connections are not enough (2014-08-20 19:32:49)
+标签： it	分类： 技术文档
+进一步分析报错原因，具体步骤如下：
+l  查看这两台系统最大的允许文件打开数
+[root@nginx01 logs]# cat /proc/sys/fs/file-max
+343927
+l  通过ulimit -n命令可以查看目前该linux系统里打开文件描述符的最大值
+[root@nginx01 logs]# ulimit -n
+20480
+ 
+检查到这里，目前系统最大的打开文件数，我们配置了20480，可以说，这其实是一个比较“大”的连接数，应该能够满足要求了。接下来，我们去查看nginx这个服务中，其自身的连接数是否配置合理？
+l  一般来说，nginx的连接数，有以下两个参数决定，分别是：worker_rlimit_nofile 和 worker_connections。
+n  worker_rlimit_nofile，这个参数表示当一个nginx进程打开的最多文件数目，它的理论值应该是打开文件描述符的最大值（ulimit –n）与nginx进程数相除，但是ngixn分配请求并不是那么均匀，所以一般与 ulimint –n的值保持一致。
+根据上述ulimit –n结果，我们对该值可以配置20480。事实上，我们也的确给它配了20480
+n   worker_connections，这个参数表示每个进程允许的最多连接数，理论上每台nginx服务器的最大连接数为 worker_processes * worker_connections， 其中，因为这两台ngixn系统均是4cpu，所以worker_processes参数=4。 而查看worker_connections，我们发现，配置的是默认的1024， 也就是说，这两台nginx服务器最大的连接数不能超过4096（含报错连接数、已结束未回收的连接数），而之前的报错“[alert] 12339#0: 1024 worker_connections are not enough”，大致意思是：12339（个数）并发连接已经超过了打开文件的资源限制:1024！
+此外， 你修改worker_connections值时，是不能超过worker_rlimit_nofile的这个值。
+鉴于上述两点，我们只需配置worker_connections=5000， 那么nginx的最大连接数=worker_connections（5000）* worker_processes（4）=20000，该值大于12339
+
+修改两台nginx.conf配置文件中的worker_connections = 5000 （原来为1024），并重启nginx
+         
+         
+#修改ulimit上限
+vim /etc/security/limits.conf
+* soft noproc 10240
+* hard noproc 10240
+* soft nofile 10240
+* hard nofile 10240             
+         
+         
+查看Nginx并发进程数：ps -ef | grep nginx | wc -l
+查看Web服务器TCP连接状态：netstat -n | awk '/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}'

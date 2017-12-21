@@ -1,0 +1,1 @@
+find /etc/nginx | xargs grep max_fails 查找系统根目录下面的所有文件的内容中包含有function字符串的文件列表。

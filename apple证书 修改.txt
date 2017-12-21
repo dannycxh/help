@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////
+(dev)
+1. apple store cer
+	openssl x509 -in aps_development.cer -inform DER -outform PEM -out dev_cert.pem
+2. keychainkey
+	openssl pkcs12 -in key.p12 -out key.pem -nodes
+3. 
+	cat dev_cert.pem key.pem > dev_ck.pem 
+
+openssl s_client -connect gateway.sandbox.push.apple.com:2195 -cert dev_cert.pem -key dev_ck.pem
+
+
+
+(live)
+1. apple store cer
+	openssl x509 -in aps.cer -inform DER -outform PEM -out live_cert.pem
+2. keychainkey
+	openssl pkcs12 -in key.p12 -out live_key.pem -nodes
+3. 
+	cat live_cert.pem live_key.pem > live_ck.pem 
+
+openssl s_client -connect gateway.push.apple.com:2195 -cert live_cert.pem -key live_ck.pem

@@ -1,0 +1,1 @@
+innodb_lock_wait_timeout  = 50(default) --> 100  性能修改
