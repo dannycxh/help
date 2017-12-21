@@ -1,0 +1,23 @@
+#!/bin/bash
+
+DAY=$(date +%Y/%m/%d)
+DAY2=$(date +%Y-%m-%d)
+HOUR=$(date +%H)
+MINUTE=$(date +%T)
+
+
+
+ERROR_CNT=$(grep "$DAY $HOUR" /var/log/nginx/error.log | wc  -l)
+echo "$DAY $HOUR"
+echo $ERROR_CNT
+
+if [ $ERROR_CNT -ge 300 ]; then
+   echo  "dangerous" 
+   mv -f /var/log/nginx/error.log /home/ec2-user/error.$DAY2-$HOUR.log
+   echo "$DAY2 $MINUTE too many error .....restart node" >> /home/ec2-user/check.log
+   pkill -f node
+else
+   FILENAME=$(date -d "-2 day" "+%Y-%m-%d")
+   gzip error.$FILENAME*.log
+   echo  "safe"  
+fi
