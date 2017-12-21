@@ -1,1 +1,28 @@
 find /etc/nginx | xargs grep max_fails 查找系统根目录下面的所有文件的内容中包含有function字符串的文件列表。
+
+
+####################################################################################################################
+# 总核数 = 物理CPU个数 X 每颗物理CPU的核数 
+# 总逻辑CPU数 = 物理CPU个数 X 每颗物理CPU的核数 X 超线程数
+
+# 查看物理CPU个数
+cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
+
+# 查看每个物理CPU中core的个数(即核数)
+cat /proc/cpuinfo| grep "cpu cores"| uniq
+
+# 查看逻辑CPU的个数
+cat /proc/cpuinfo| grep "processor"| wc -l
+
+
+####################################################################################################################
+apt
+If you only want to modify apt-get, then you can force IPv4 with:
+
+apt-get -o Acquire::ForceIPv4=true update
+To make the setting persistent, create the file 99force-ipv4 in /etc/apt/apt.conf.d/.
+
+sudoedit /etc/apt/apt.conf.d/99force-ipv4
+Put the following contents in it:
+
+Acquire::ForceIPv4 "true";
