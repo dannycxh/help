@@ -1,0 +1,103 @@
+#NSFW
+
+apt-get install dcoker.io
+
+docker run -ti bvlc/caffe:cpu caffe --version
+
+
+
+#####
+
+#!/bin/bash
+
+for ((i=0; i<200;i++ ))  
+do  
+    sleep 3;docker run --volume=$(pwd):/workspace ec001099f130 python ./classify_nsfw.py --model_def nsfw_model/deploy.prototxt --pretrained_model nsfw_model/resnet_50_1by2_nsfw.caffemodel ab7eca1ad301bc5e637040f8ba62fc75.jpg &
+done
+
+
+
+docker rm $(docker ps -a -q)
+
+rm -rf /usr/src/open_nsfw/*.jpg
+
+
+###################### for cake
+docker run  -v /usr/src/open_nsfw:/usr/src/open_nsfw  -w /usr/src/open_nsfw  ec001099f130 python ./classify_nsfw.py --model_def nsfw_model/deploy.prototxt --pretrained_model nsfw_model/resnet_50_1by2_nsfw.caffemodel test.jpg  &
+
+#!/bin/bash
+
+for v in {1..50}  
+#for varible1 in 1 2 3 4 5  
+do  
+     sleep 1;
+     /usr/src/open_nsfw/cmd >> /usr/src/open_nsfw/rs.log
+done  
+
+#docker rm $(docker ps -a -q)
+#rm -rf /usr/src/open_nsfw/*.jpg
+
+
+
+
+
+############# Steam ##################
+
+
+docker run --volume=/var/tmp:/workspace -w /workspace e7e230b97e87 python -V
+
+
+运行容器
+runoob@runoob:~/python$ docker run  -v $PWD/myapp:/usr/src/myapp  -w /usr/src/myapp python:3.5 python helloworld.py
+命令说明：
+-v $PWD/myapp:/usr/src/myapp :将主机中当前目录下的myapp挂载到容器的/usr/src/myapp
+-w /usr/src/myapp :指定容器的/usr/src/myapp目录为工作目录
+python helloworld.py :使用容器的python命令来执行工作目录中的helloworld.py文件
+
+
+
+
+
+
+docker build .   #保存dockerfile文件一起执行
+
+############# DockerFile ##################
+
+# Pull base image  
+FROM ubuntu:13.10  
+  
+MAINTAINER zing wang "zing.jian.wang@gmail.com"  
+  
+# update source  
+RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe"> /etc/apt/sources.list  
+RUN apt-get update  
+  
+# Install curl  
+RUN apt-get -y install curl  
+  
+# Install JDK 7  
+RUN cd /tmp &&  curl -L 'http://download.oracle.com/otn-pub/java/jdk/7u65-b17/jdk-7u65-linux-x64.tar.gz' -H 'Cookie: oraclelicense=accept-securebackup-cookie; gpw_e24=Dockerfile' | tar -xz  
+RUN mkdir -p /usr/lib/jvm  
+RUN mv /tmp/jdk1.7.0_65/ /usr/lib/jvm/java-7-oracle/  
+  
+# Set Oracle JDK 7 as default Java  
+RUN update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-7-oracle/bin/java 300     
+RUN update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-7-oracle/bin/javac 300     
+  
+ENV JAVA_HOME /usr/lib/jvm/java-7-oracle/  
+  
+# Install tomcat7  
+RUN cd /tmp && curl -L 'http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.8/bin/apache-tomcat-7.0.8.tar.gz' | tar -xz  
+RUN mv /tmp/apache-tomcat-7.0.8/ /opt/tomcat7/  
+  
+ENV CATALINA_HOME /opt/tomcat7  
+ENV PATH $PATH:$CATALINA_HOME/bin  
+  
+ADD tomcat7.sh /etc/init.d/tomcat7  
+RUN chmod 755 /etc/init.d/tomcat7  
+  
+# Expose ports.  
+EXPOSE 8080  
+  
+# Define default command.  
+ENTRYPOINT service tomcat7 start && tail -f /opt/tomcat7/logs/catalina.out  
