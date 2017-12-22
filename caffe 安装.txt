@@ -84,3 +84,68 @@ Caffe配置简明教程 ( Ubuntu 14.04 / CUDA 7.5 / cuDNN 5.1 / OpenCV 3.1 )  ht
 更多Ubuntu相关信息见Ubuntu 专题页面 http://www.linuxidc.com/topicnews.aspx?tid=2
 
 本文永久更新链接地址：http://www.linuxidc.com/Linux/2016-09/135034.htm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###################################   可能有的问题 1
+
+ubuntu配置caffe遇到的问题
+原创 2016年04月02日 14:51:15 标签：caffe环境配置 /ubuntu 12965
+以下是本人在配置caffe遇到的问题，比较简单，但是由于网上现成的资料比较少，所以还是花了不少时间才解决它们。
+在此把这些问题展示出来，希望能让和我一样的新手少走一些弯路。
+环境 ubuntu15.10,cuda7.5,cudnn-7.0-linux-x64-v4-rc
+
+
+1、make all步骤出现错误
+./include/caffe/util/hdf5.hpp:6:18: fatal error: hdf5.h: No such file or directory
+
+解决方法
+在Makefile.config文件的第85行，添加 /usr/include/hdf5/serial/ 到 INCLUDE_DIRS，也就是把下面第一行代码改为第二行代码。
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial/
+
+在Makefile文件的第173行，把 hdf5_hl 和hdf5修改为hdf5_serial_hl 和 hdf5_serial，也就是把下面第一行代码改为第二行代码。
+LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_hl hdf5
+LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_serial_hl hdf5_serial
+
+英文文档链接
+https://gist.github.com/wangruohui/679b05fcd1466bb0937f
+
+2、make pycaffe出现错误
+
+python/caffe/_caffe.cpp:10:31: fatal error: numpy/arrayobject.h: no such file or directory
+Makefile:498: recipe for target 'python/caffe/_caffe.so' failed make: *** [python/caffe/_caffe.so] Error 1
+
+原因
+python-numpy没有安装到位
+
+解决方法
+输入命令
+sudo apt-get install python-numpy
+确认Makefile.config文件中有以下代码，注意路径或版本号与自己的相符。
+PYTHON_INCLUDE := /usr/include/python2.7 \
+/usr/lib/python2.7/dist-packages/numpy/core/include
+
+3.cudnn的安装
+copy文件至CUDA安装目录:解压后,在你的目录下生成一个“cuda”文件夹,对于cuDNN6.5的版本解压后生成“cudnn­6.5­linux­x64­v2”文件。使用如下命令copy,注意第二个有个 -a 参数,否则,拷贝过去的文件失去了链接。
+1 # copy the library files into CUDA's include and lib folders
+2 sudo cp cuda/include/cudnn.h /usr/local/cuda/include
+3 sudo cp -a cuda/lib64/libcudnn* /usr/local/cuda/lib64
+cuDNN安装完成。
+在这一步骤，按照网上的一些教程配置cudnn时，需要更新软链接，但是由于版本不同等原因，可能不能正确地输入更新软链接命令，通过-a参数，可以省去更新软链接命令。
