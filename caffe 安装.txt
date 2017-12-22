@@ -1,0 +1,86 @@
+caffe 
+
+
+
+操作系统: Ubuntu 16.04
+是否使用PYTHON API: 是, 目标是安装后CAFFE能作为PYTHON MODULE来使用
+硬件: 低端笔记本, 只使用CPU模式
+ 
+这是我安装的过程, 并非安装教程. 相同情况下可以参考, 能省下一些看文档的时间.
+参考: CAFFE官网安装指南页面http://caffe.berkeleyvision.org/installation.html#compilation
+ 
+ 
+第一部分: 安装dependencies
+sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler
+sudo apt-get install --no-install-recommends libboost-all-dev
+sudo apt-get install libatlas-base-dev
+sudo apt-get install libhdf5-serial-dev
+ 
+PYTHON需要2.7版本,这是操作系统本身已经安装好的. 输入python2.7 --version 会显示具体的版本号说明安装了.
+但是还需要sudo apt-get install python-dev
+ 
+sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev
+(以上所有sudo apt-get在什么文件夹下输入都无所谓.)
+ 
+然后把CAFFE的源代码下载下来: git clone https://github.com/BVLC/caffe.git
+(当然没有安装GIT的得先安装一下)
+下载完成之后,进入CAFFE文件夹, 进入里面的PYTHON文件夹,然后输入
+for req in $(cat requirements.txt); do pip install $req; done
+(PIP如果没有安装得先安装一下:sudo apt install python-pip)
+ 
+第二部分: 安装CAFFE
+到CAFFE文件夹, 使用模板写个Makefile.config. 具体就是先复制一下模板, 再改一些内容(我喜欢用EMACS).
+cp Makefile.config.example Makefile.config
+-因为CPU MODE, 所以在CPU_ONLY := 1前面的#要去掉.
+-两个路径要改成这样:(添加后面的两个hdf5的路径, 否则编译时报hdf5错误)
+# Whatever else you find you need goes here.
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial
+LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib /usr/lib/x86_64-linux-gnu/hdf5/serial
+ 
+准备好了.
+make pycaffe
+make all
+make test
+make runtest
+--结果显示ALL TESTS PASSED就安装好了, 只需要再加上一个PYTHONPATH; 
+另外, 这个make默认是用CPU单核运算,如果想要快一点, 比如我想使用四核, 在make后面加上-j4标签.
+如果上面4行某一行报错之后想要重试,建议先make clean再重新开始.
+ 
+ 
+第三部分: 设置 Python Caffe
+去到CAFFE文件夹里面的python文件夹, 把当前路径记录下来(pwd). 然后输入以下命令(把记下的路径放在相应地方)
+export PYTHONPATH=/path/to/caffe/python:$PYTHONPATH
+ 
+这时候应该可以了,试验一下:
+$ python2.7
+Python 2.7.12 (default, Jul  1 2016, 15:12:24) 
+[GCC 5.4.0 20160609] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import caffe
+>>> 
+说明安装全部完成!
+ 
+第四部分: 错误
+基本上所有错误都是因为dependencies缺乏或者路径不对,所以根据具体的错误信息对症下药.例如:
+-编译时显示hdf5错误, 按照上面所说, 增加路径之后就解决了. 
+-import caffe时显示scikit-image错误, 那就安装一下scikit-image就好了.
+pip install scikit-image
+ 
+很多人都在安装CAFFE时遇到各种错误, 请给多一点点耐心, 多谷歌一下, 一定能完成的。
+Ubuntu 16.04下Matlab2014a+Anaconda2+OpenCV3.1+Caffe安装 http://www.linuxidc.com/Linux/2016-07/132860.htm
+
+Ubuntu 16.04系统下CUDA7.5配置Caffe教程 http://www.linuxidc.com/Linux/2016-07/132859.htm
+
+Caffe在Ubuntu 14.04 64bit 下的安装 http://www.linuxidc.com/Linux/2015-07/120449.htm
+
+深度学习框架Caffe在Ubuntu下编译安装  http://www.linuxidc.com/Linux/2016-07/133225.htm
+
+Caffe + Ubuntu 14.04 64bit + CUDA 6.5 配置说明  http://www.linuxidc.com/Linux/2015-04/116444.htm
+
+Ubuntu 16.04上安装Caffe http://www.linuxidc.com/Linux/2016-08/134585.htm
+
+Caffe配置简明教程 ( Ubuntu 14.04 / CUDA 7.5 / cuDNN 5.1 / OpenCV 3.1 )  http://www.linuxidc.com/Linux/2016-09/135016.htm
+
+更多Ubuntu相关信息见Ubuntu 专题页面 http://www.linuxidc.com/topicnews.aspx?tid=2
+
+本文永久更新链接地址：http://www.linuxidc.com/Linux/2016-09/135034.htm
