@@ -33,8 +33,14 @@ Acquire::ForceIPv4 "true";
 1.	$ sudo apt-get install python-pip python-dev build-essential 
   	$ sudo pip install --upgrade pip 
 	  $ sudo pip install --upgrade virtualenv 
-	
-2. sudo wget http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
-3. sudo ./scripts/download_model_binary.py models/bvlc_reference_caffenet  
+
+2  git clone https://github.com/dannycxh/caffe.git
+3. cd caffe	
+4. sudo wget http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
+5. sudo ./scripts/download_model_binary.py models/bvlc_reference_caffenet  
 	(maybe #sudo  pip install PyYAML   
 	       #sudo pip install six )
+	       
+	       
+
+docker run  -v /home/ubuntu/caffe:/home/ubuntu/caffe  -w /home/ubuntu/caffe  ec001099f130
