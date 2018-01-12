@@ -15,6 +15,7 @@ sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev 
 sudo apt-get install --no-install-recommends libboost-all-dev
 sudo apt-get install libatlas-base-dev
 sudo apt-get install libhdf5-serial-dev
+     apt-get install libgoogle-glog-dev libgflags-dev liblmdb-dev
  
 PYTHON需要2.7版本,这是操作系统本身已经安装好的. 输入python2.7 --version 会显示具体的版本号说明安装了.
 但是还需要sudo apt-get install python-dev
@@ -149,6 +150,108 @@ copy文件至CUDA安装目录:解压后,在你的目录下生成一个“cuda”
 3 sudo cp -a cuda/lib64/libcudnn* /usr/local/cuda/lib64
 cuDNN安装完成。
 在这一步骤，按照网上的一些教程配置cudnn时，需要更新软链接，但是由于版本不同等原因，可能不能正确地输入更新软链接命令，通过-a参数，可以省去更新软链接命令。
+
+
+
+Ubuntu下编译caffe
+纯粹是个人编译的记录。不用CUDA（笔记本是amd卡，万恶的nvidia）；不手动编译依赖包（apt-get是用来干啥的？用来直接装二进制包，以及自动解决依赖项的）
+caffe官方给出的ubuntu下的教程在http://caffe.berkeleyvision.org/install_apt.html
+
+make: protoc: 命令未找到
+解决办法：
+
+sudo apt-get install protobuf-c-compiler protobuf-compiler
+fatal error: gflags/gflags.h:没有那个文件或目录
+解决办法：
+
+sudo apt-get install libgflags-dev
+顺便吐槽一下ubuntu的apt-get命令的补全，它是残破的。我想下载gflags，于是输入：
+
+sudo apt-get install gflags #此处直接按tab，希望它补全，tab一次不出来就再按一次
+结果呢，只显示了一个结果：
+
+sudo apt-get install libgflags2v5
+问题是，实际上有3个结果：libflags2v5,libgflags-dev,libgflags-doc
+
+ubuntu的命令行，另一个残破的地方在于，各种包总是喜欢私自添加lib前缀，比如，好好的opencv，非得要libopencv才行（全名并不是libopencv和oepncv，通常都是用-dev或-devel各种的包）
+
+fatal error: glog/logging.h: 没有那个文件或目录
+尝试apt-get install glog，妈蛋，没有。要这样：
+
+sudo apt-get install libgoogle-glog-dev
+fatal error: hdf5.h: 没有那个文件或目录
+妈蛋！老子执行过apt-get install hdf5-tools了，怎么还说没有hdf5？而且我当时tab了好几下，只有两个结果，另一个是hdf5-helpers不装也罢。
+其实，这又是ubuntu的命令行比较残破的原因。为什么不能完整点搜索？
+
+当然这次，需要的不仅仅是一个-dev包，因为试了后还是报同样错误，那就尝试：
+
+sudo apt-get install libhdf5-\*  #我用的shell是zsh，如果你没有用zsh，那就是默认的bash，那就把“\”去掉。这，是zsh比较残破的地方
+然后再make all，还是报同样错误。怒了，这次是caffe自身的问题。要在Makefile.config中把hdf5的一个目录添加进来：
+
+# 找到这行：
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include
+
+# 替换为：
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial/
+fatal error: lmdb.h: 没有那个文件或目录
+擦，刚刚明明apt-get安装了lmdb-utils，怎么又来？而且，安装lmdb时tab了好几次只有这么一个有用的结果。
+这次，又是ubuntu命令的残破引发的。
+
+解决办法：
+
+sudo apt-get install liblmdb-dev
+make: *** [.build_release/lib/libcaffe.so.1.0.0-rc3] Error 1
+这次的问题有点大了。问题完整描述：
+
+AR -o .build_release/lib/libcaffe.a
+LD -o .build_release/lib/libcaffe.so.1.0.0-rc3
+/usr/bin/ld: cannot find -lboost_python3
+collect2: error: ld returned 1 exit status
+Makefile:563: recipe for target '.build_release/lib/libcaffe.so.1.0.0-rc3' failed
+make: *** [.build_release/lib/libcaffe.so.1.0.0-rc3] Error 1
+我也想不出办法，于是google之。发现caffe在github的repo上有人提出同样的问题：https://github.com/BVLC/caffe/issues/4045
+然后，真是不友好或没有用的回答，维护caffe的都是什么鬼？！说什么，别在issue里提“使用，安装，编译出错”的问题，请使用caffe-users list。我就草，issue不是用来解决问题的么？user list是google group谷歌用户组，一个更不好用的东西，连markdown都没有，太落后了。anyway，这些都不管用。
+
+管用的方法：再次修改Makefile.config（艹，caffe官方的Makefile.config你敢再残破一点么？市面上一共就3种最常用的跑caffe的平台，第一个就是ubuntu还搞这么用户不友好，第二个是fedora只能说还凑合因为fedora自身命令比ubuntu完善，第三个mac用户暂时不考虑，真正跑caffe的都是烧GPU的，mac用户管他干啥）
+
+anyway，要这样改:
+
+# 原来
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial
+
+LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib
+
+# 现在改成（64位系统）：
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial
+
+LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/hdf5/serial
+
+# 或者，你是32位系统：
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial
+
+LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib /usr/lib/i386-linux-gnu /usr/lib/i386-linux-gnu/hdf5/serial
+这样就好了么？天真。还得执行非常肮脏的sed脚本！
+
+find . -type f -exec sed -i -e 's^"hdf5.h"^"hdf5/serial/hdf5.h"^g' -e 's^"hdf5_hl.h"^"hdf5/serial/hdf5_hl.h"^g' '{}' \;
+这个可能是ubuntu自身的问题，也可能是caffe的问题。
+
+blas的问题
+作为小白用户，方便起见，用不着去搞MKL，一则申请麻烦，二则太大。同时也要尽量避免手动编译。手动编译源码可能带来更多的依赖项问题。所以尽可能全都用apt-get安装。
+
+sudo apt-get install libopenblas-dev
+reference
+https://github.com/BVLC/caffe/wiki/Ubuntu-16.04-or-15.10-Installation-Guide
+https://github.com/SHUCV/caffe_demo/wiki/install-caffe-on-ubuntu14.04
+
+==== update 2016年11月5日 17:39:33 ====
+换ubuntu16.04了，编译caffe时会提示：memcpy未定义
+解决方法：Makefile中，找到：
+
+NVCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
+
+换成
+
+NVCCFLAGS += -D_FORCE_INLINES -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
 
 
 
