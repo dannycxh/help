@@ -23,7 +23,7 @@ rm -rf /usr/src/open_nsfw/*.jpg
 
 
 ###################### for cake
-docker run  -v /usr/src/open_nsfw:/usr/src/open_nsfw  -w /usr/src/open_nsfw  ec001099f130 python ./classify_nsfw.py --model_def nsfw_model/deploy.prototxt --pretrained_model nsfw_model/resnet_50_1by2_nsfw.caffemodel test.jpg  &
+docker run  -v /usr/src/open_nsfw:/usr/src/open_nsfw  -w /usr/src/open_nsfw  b8f4ae733db7 python ./classify_nsfw.py --model_def nsfw_model/deploy.prototxt --pretrained_model nsfw_model/resnet_50_1by2_nsfw.caffemodel test.jpg  &
 
 #!/bin/bash
 
