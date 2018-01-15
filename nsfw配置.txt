@@ -1,6 +1,6 @@
-#NSFW
+#NSFW  
 
-apt-get install dcoker.io
+apt-get install dcoker.io  (curl -sSL https://get.docker.com | sudo sh  #如果本地docker库不存在)
 
 docker run -ti bvlc/caffe:cpu caffe --version
 
