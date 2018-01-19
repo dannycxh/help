@@ -19,3 +19,75 @@ sudo dokcer login
 step 5 
 sudo docker push REPOSITORY:Tag
 
+
+
+
+
+
+
+
+
+####################################### install opencv #########################################################################################################
+#########Step 1  安装包
+sudo apt-get install build-essential
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev # 处理图像所需的包
+sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev liblapacke-dev
+sudo apt-get install libxvidcore-dev libx264-dev # 处理视频所需的包
+sudo apt-get install libatlas-base-dev gfortran # 优化opencv功能
+sudo apt-get install ffmpeg zip
+
+#########step 2 download opencv source code
+wget https://github.com/opencv/opencv/archive/3.4.0.zip
+
+
+#########step 3a.配置编译opencv (无NVIDIA CUDA版本)
+将上述opencv包解压，然后cmake配置属性
+$ unzip opencv-3.4.0
+$ cd opencv-3.4.0
+$ mkdir build
+$ cd build
+$ cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/home/fanzong/anaconda2/envs/tensorflow \
+    -D INSTALL_PYTHON_EXAMPLES=ON \
+    -D INSTALL_C_EXAMPLES=OFF \
+    -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.2.0/modules \
+    -D PYTHON_EXCUTABLE=/home/fanzong/anaconda2/envs/tensorflow/bin/python \
+    -D WITH_TBB=ON \
+    -D WITH_V4L=ON \
+    -D WITH_QT=ON \    # 1
+    -D WITH_GTK=ON \
+    -D WITH_OPENGL=ON \
+    -D BUILD_EXAMPLES=ON .. # cmake命令的使用方式：cmake [<some optional parameters>] <path to the OpenCV source directory>。如果命令报错的话可以试着把-D后面的空格去掉在执行一次。
+    
+(--实际测试用到的命令 cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_V4L=ON  -D WITH_OPENGL=ON ..)
+    
+    
+$ make -j4
+$ sudo make install
+$ sudo /bin/bash -c 'echo "/home/fanzong/anaconda2/envs/tensorflow/lib" > /etc/ld.so.conf.d/opencv.conf'
+$ sudo ldconfig
+
+
+
+#########step3.b 配置编译opencv (NVIDIA CUDA版本)
+opencv最麻烦的地方就是编译是属性的配置，对于不同的需求要配置不同的属性。当使用NVIDIA GPU GeForce 1080ti的时候：
+
+$ cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D INSTALL_PYTHON_EXAMPLES=ON \
+    -D INSTALL_C_EXAMPLES=OFF \
+    -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.2.0/modules \
+    -D PYTHON_EXCUTABLE=/usr/bin/python \
+    -D WITH_CUDA=ON \    # 使用CUDA
+    -D WITH_CUBLAS=ON \
+    -D DCUDA_NVCC_FLAGS="-D_FORCE_INLINES" \
+    -D CUDA_ARCH_BIN="5.3" \    # 这个需要去官网确认使用的GPU所对应的版本[查看这里](https://developer.nvidia.com/cuda-gpus)
+    -D CUDA_ARCH_PTX="" \
+    -D CUDA_FAST_MATH=ON \    # 计算速度更快但是相对不精确
+    -D WITH_TBB=ON \
+    -D WITH_V4L=ON \
+    -D WITH_QT=ON \    # 如果qt未安装可以删去此行;若因为未正确安装qt导致的Qt5Gui报错，可将build内文件全部删除后重新cmake，具体可以参考[这里](http://stackoverflow.com/questions/17420739/opencv-2-4-5-and-qt5-error-s)
+    -D WITH_GTK=ON \
+    -D WITH_OPENGL=ON \
+    -D BUILD_EXAMPLES=ON .
