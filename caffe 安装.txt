@@ -50,7 +50,7 @@ make runtest
  
 第三部分: 设置 Python Caffe
 去到CAFFE文件夹里面的python文件夹, 把当前路径记录下来(pwd). 然后输入以下命令(把记下的路径放在相应地方)
-export PYTHONPATH=/path/to/caffe/python:$PYTHONPATH
+export PYTHONPATH=/usr/src/caffe/python/caffe:$PYTHONPATH
  
 这时候应该可以了,试验一下:
 $ python2.7
