@@ -1,5 +1,5 @@
 find /etc/nginx | xargs grep max_fails #查找系统根目录下面的所有文件的内容中包含有function字符串的文件列表。
-find . -type f -name "*.log" -print0 | xargs -0 rm -f  #用rm 删除太多的文件时候，可能得到一个错误信息：/bin/rm Argument list too long. 用xargs去避免这个问题：
+find . -type f -name "*.jpg" -print0 | xargs -0 rm -f  #用rm 删除太多的文件时候，可能得到一个错误信息：/bin/rm Argument list too long. 用xargs去避免这个问题：
 grep -rn "hello,world!" *
 * : 表示当前目录所有文件，也可以是某个文件名
 -r 是递归查找
@@ -51,6 +51,9 @@ Acquire::ForceIPv4 "true";
 	       
 
 docker run  -v /home/ubuntu/caffe:/home/ubuntu/caffe  -w /home/ubuntu/caffe  ec001099f130
+
+####################################  install openvpn   ################################################################################ 
+wget https://git.io/vpn -O openvpn-install.sh && bash openvpn-install.sh
 
 ####################################apt-get ################################################################################ 
 apt-cache search package 搜索包

@@ -1,0 +1,15 @@
+1. apt-get install python3-pip python3-dev  # 安装python环境
+2. virtualenv -p /usr/bin/python3 steamenv  # 创建虚拟的python3环境
+3. source steamenv/bin/activate             # 激活虚拟环境
+4. pip3 install tensorflow scipy scikit-learn opencv-python h5py matplotlib Pillow requests psutil	                 # 安装TensorFlow的相关包
+      --    >>> import tensorflow as tf
+						>>> print(tf.__version__)
+				
+	 在python虚拟环境中
+	 a. git clone https://github.com/davidsandberg/facenet
+	 b. export PYTHONPATH=/home/ubuntu/steamenv/dev/facenet/src		(export PYTHONPATH=/Users/danny/Desktop/Work/python/TensorFlow-FaceNet/src)
+	 
+	 		python src/align/align_dataset_mtcnn.py --image_size 160 --margin 32 --random_order --gpu_memory_fraction 0.25 data/ data/output			
+	 		###python3 src/align/align_dataset_mtcnn.py data/images dataset/lfw_mtcnnpy_160 --image_size 160 --margin 32 --random_order --gpu_memory_fraction 0.25 & done
+	 		
+	 		python3 src/validate_on_lfw.py data/output src/models/20170511-185253/
