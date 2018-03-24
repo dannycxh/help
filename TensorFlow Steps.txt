@@ -1,0 +1,92 @@
+Ubuntu16.04下默认系统自带python2和Python3.5的版本，这个版本被系统很多程序所依赖，所以不建议删除，如果使用最新的Python3.6那么我们知道编译安装源码包和系统默认包之间是没有任何影响的.
+
+首先去python官网下载python3的源码包，网址：https://www.python.org/
+https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tgz
+
+进去之后点击导航栏的Downloads，也可以鼠标放到Downloads上弹出菜单选择Source code，就是源码包的意思，这里选择最新版本3.6.1，当然下面也有很多其他历史版本，点进去之后页面下方可以看到下载链接 
+选择Download Gzipped source tarball，下载下来后就是Python-3.6.1.tgz
+
+打开终端，利用命令cd 进入文件所在文件夹里
+释放文件 
+tar xfz Python-3.6.1.tgz 
+这里使用xfz命令，而不建议使用-xvzf命令，因为其释放的文件夹需要root权限才可以更改或者删除。
+
+进入释放的文件夹 
+cd Python-3.6.1/
+
+添加配置 
+./configure –prefix=/usr/bin/python3.6 
+要配置的是安装Python需要的文件夹。配置完成后，终端会显示下面一段话，可以选择无视它，不影响后续操作。 
+If you want a release build with all optimizations active (LTO, PGO, etc), 
+please run ./configure –enable-optimizations
+
+编译源码 
+sudo make
+
+执行安装 
+sudo make install 
+安装过程持续几分钟，安装成功后，安装的Python就在 计算机/usr/python3.6 文件夹之中。
+
+修改默认Python版本 
+Ubuntu16.04版本集成了Python2.7及3.5版本，系统中原来的python在/usr/bin/python，通过ls -l可以看到，python是一个软链接，链接到本目录下的python2.6 
+我们需要先把这个默认链接删除，再新建一个python3.6的软链接. 
+首先要确保终端的指针已经退回根目录，再进行以下操作
+
+需要删除原有的Python链接文件: 
+rm /usr/bin/python
+
+注意如果终端提示：rm: 无法删除’/usr/bin/python’: 权限不够，那么就需要打开root权限删除链接。
+
+建立指向Python3.6的链接： 
+ln -s /usr/local/bin/python3.6 /usr/bin/python
+
+查询Python版本 
+python –version 
+如果显示是python3.6.1则说明安装成功！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+三、安装TensorFlow
+
+有很多种安装方法，可以自行搜索。tensorflow有CPU和GPU两个版本, 后者支持使用GPU能力来做数据运算, 对GPU的型号有一定限制, 还要安装一堆东西, 对于新手,没必要装(官方推荐先装CPU的).
+
+用下面命令安装pip和virtualenv
+
+sudo apt-get install python-pip python-dev python-virtualenv
+sudo apt-get install python3-pip python3-dev python3-virtualenv
+创建一个virtualenv环境
+
+--virtualenv --system-site-packages targetDirectory
+--virtualenv --system-site-packages ~/tensorflow,
+注意:这里的”targetDirectory”定义了virtualenv的根目录,这里推荐使用 ~/tensorflow,所以这里的输入是:
+:::::  virtualenv -p /usr/bin/python3 tensorflow
+
+激活刚才创建的virtualenv环境
+
+一般情况下(如果你用的是ubuntu自带的终端或者用的不是csh)输入:
+
+source ~/tensorflow/bin/activate12
+如果你用的终端是csh,请输入:
+
+source ~/tensorflow/bin/activate.csh12
+输入命令后,你的命令行前面会出现”(tensorflow)”,如果成功的话.
+
+4. 现在,在这个已经被激活了的tensorflow环境下,使用下面语句安装tensorflow的cpu版
+
+(tensorflow)$ pip install --upgrade tensorflow # 如果你用 Python 2.7(tensorflow)
+$ pip3 install --upgrade tensorflow # 如果你用Python3.n
+
+python3 -c 'import tensorflow as tf; print(tf.__version__)'  # for Python 3
