@@ -1,0 +1,16 @@
+1. 连接MongoDB
+ssh -i "sendingio-2015-oregon.pem" ubuntu@ec2-34-208-48-202.us-west-2.compute.amazonaws.com
+
+
+2. Mongodb脚本
+#!/bin/bash
+CNT=$(ps -ef | grep "mongod.conf" | grep -v "grep" | wc -l)
+
+if [ $CNT -lt 1 ]; then
+    echo "$(date) mongodb is down" >> /usr/src/mongodb.log
+    #$(/usr/bin/mongod -f /etc/mongod.conf --fork --maxConns=30000 --storageEngine=wiredTiger)
+else
+    echo "$(date) mongodb is alive" 
+fi
+
+

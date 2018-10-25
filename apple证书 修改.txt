@@ -3,9 +3,9 @@
 1. apple store cer
 	openssl x509 -in aps_development.cer -inform DER -outform PEM -out dev_cert.pem
 2. keychainkey
-	openssl pkcs12 -in key.p12 -out key.pem -nodes
+	openssl pkcs12 -in dev.p12 -out dev.pem -nodes
 3. 
-	cat dev_cert.pem key.pem > dev_ck.pem 
+	cat dev_cert.pem dev.pem > dev_ck.pem 
 
 openssl s_client -connect gateway.sandbox.push.apple.com:2195 -cert dev_cert.pem -key dev_ck.pem
 
