@@ -1,0 +1,17 @@
+osascript -e 'tell app "Terminal"
+    activate
+    set myList to {*，*，*，*}
+    repeat with x in myList
+			tell app "System Events"  
+				keystroke "t" using {command down}
+				keystroke "ssh root@" & x
+				keystroke return 
+				delay 5
+				keystroke "******" 
+				keystroke return 
+				delay 3
+				keystroke "tail -f tensorflow/tensor-nsfw/run.log"
+				keystroke return 
+			end tell	
+		end repeat	
+end tell'
