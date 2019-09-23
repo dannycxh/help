@@ -14,3 +14,7 @@ else
 fi
 
 
+
+
+#启动脚本
+mongod -f /etc/mongod.conf --fork --maxConns=30000 --storageEngine=wiredTiger

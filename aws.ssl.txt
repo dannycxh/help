@@ -1,0 +1,49 @@
+openssl x509 -inform der -in /Users/danny/Desktop/Work/keys/ssl/caking.me.der -out /Users/danny/Desktop/Work/keys/ssl/caking.me.pem
+openssl x509 -in AddTrustExternalCARoot.crt -out AddTrustExternalCARoot.pem -outform PEM
+
+aws iam upload-server-certificate --server-certificate-name cakingme2018 --certificate-chain file://Chain.pem --private-key file://caking.me.key.pem --certificate-body file://caking.me.crt
+aws iam upload-server-certificate --server-certificate-name caketv20180824 --certificate-chain file://Chain.pem --private-key file://www.cake.tv.key.pem --certificate-body file://www.cake.tv.crt
+aws iam upload-server-certificate --server-certificate-name cakingme2019 --certificate-chain file://SectigoRSADomainValidationSecureServerCA.crt --private-key file://www.caking.me.key.pem --certificate-body file://www_caking_me.crt
+
+
+
+Chris Fuller - Tech Blog
+About
+AWS IAM SSL upload with intermediate and root certificates
+Jun 27, 2015
+
+Uploading a new SSL certificate to Amazon Web Services with intermediate and root certifcates took some trial and error. This kept happening:
+
+A client error (MalformedCertificate) occurred when calling the UploadServerCertificate operation: Unable to validate certificate chain. The certificate chain must start with the immediate signing certificate, followed by any intermediaries in order. The index within the chain of the invalid certificate is: -1 until I managed to put the certificates in the chain file in the correct order.
+Below are the correct operations to upload a new SSL to AWS. The example here is for AlphaSSL but you can adapt the instructions for your SSL provider.
+
+Save your private key that you used to purchase your SSL certificate as key.pem.
+Download AlphaSSL's intermediate certifcate here. I used the certificate labelled "SHA-256 - Orders March 31, 2014 and After". Save as intermediate.crt
+Download AlphaSSL's root certificate here. Save as root.pem
+Save the certifcate that AlphaSSL emailed you when you bought the SSL as cert.crt
+Create the chain file: cat intermediate.crt root.pem > chain.pem. This is the bit that took some trial and error.
+Upload to AWS: aws iam upload-server-certificate --server-certificate-name your-domain.co.uk --certificate-chain file://chain.pem --private-key file://key.pem --certificate-body file://cert.crt
+Other tips:
+
+Update 9/12/2015: Ensure that you include the file:// prefixes to avoid A client error (MalformedCertificate) occurred when calling the UploadServerCertificate operation: Unable to parse certificate. Please ensure the certificate is in PEM format. errors
+Remember to include the -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- lines in the certificate files
+Remember to include the -----BEGIN RSA PRIVATE KEY----- and -----END RSA PRIVATE KEY----- lines in the private key
+The lines in your key and certificate files should be exactly 64 characters (apart from the first and last lines)
+For more information, the official documentation is here
+
+
+Chris Fuller - Tech Blog
+Chris Fuller - Tech Blog
+chris@cjwfuller.com
+ cjwfuller
+ cjwfuller
+Tech blog built with Jekyll
+
+
+
+
+################ NetTangerine.com############## pw:tan****888
+1. openssl genrsa -des3 -out nettangerine.key 1024
+openssl verify -verbose -CAfile AddTrustExternalCARoot.crt COMODORSAAddTrustCA.crt
+aws iam upload-server-certificate --server-certificate-name nettangerine2019 --certificate-chain file://COMODORSAAddTrustCA.crt --private-key file://nettangerine_real.pem --certificate-body file://nettangerine_com.crt
+aws iam upload-server-certificate --server-certificate-name showbobme2018  --certificate-chain file://COMODORSADomainValidationSecureServerCA.crt --private-key file://www.showbob.me.key    --certificate-body file://www_showbob_me.crt
